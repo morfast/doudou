@@ -20,8 +20,9 @@ def toBlock(filename):
     for line in open(filename).readlines()[3:-3]:
         spline =  line.split("\t")
         if not re.search("[0-9]", line):
-            blocks.append(block)
-            block = []
+            if block != []:
+                blocks.append(block)
+                block = []
         else:
             for i in spline[2:-2]:
                 if re.search("[0-9]", i):
