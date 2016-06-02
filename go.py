@@ -4,6 +4,7 @@ import re
 import sys
 import math
 import glob
+import xlrd
 
 def meandev(lst):
     mean = sum(lst)/len(lst)
@@ -11,8 +12,14 @@ def meandev(lst):
 
     return mean, dev
 
-
 def toBlock(filename):
+    try: 
+        xlrd.open_workbook(filename)
+        return toBlock_xls(filename)
+    except:
+        return toBlock_txt(filename)
+
+def toBlock_txt(filename):
     """ open source data file and convert it to python lists """
     blocks = []
     block = []
@@ -29,6 +36,27 @@ def toBlock(filename):
                     block.append(float("".join([chr(j) for j in map(ord, i) if j > 0])))
 
     return blocks
+
+def toBlock_xls(filename):
+    blocks = []
+    block = []
+
+    wb = xlrd.open_workbook(filename)
+    table = wb.sheets()[0]
+
+    for rownum in range(3, table.nrows-3):
+        num_line = False
+        for n in table.row_values(rownum)[2:-2]:
+            if isinstance(n, float):
+                num_line = True
+                block.append(n)
+        if not num_line:
+            if block != []:
+                blocks.append(block)
+                block = []
+
+    return blocks
+
 
 def writeResult(outfilename, blocks, data_per_group):
     """ write result to files """
