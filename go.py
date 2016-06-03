@@ -3,6 +3,7 @@
 import re
 import sys
 import math
+import glob
 
 def meandev(lst):
     mean = sum(lst)/len(lst)
@@ -30,8 +31,8 @@ def toBlock(filename):
 
 def writeResult(outfilename, blocks, data_per_group):
     """ write result to files """
-    allfile = open("".join([outfilename, "_all.xls"]), "w")
-    meandevfile = open("".join([outfilename, "_meandev.xls"]), "w")
+    allfile = open("".join(["res_", outfilename, ".xls"]), "w")
+    meandevfile = open("".join(["res_", outfilename, "_meandev.xls"]), "w")
 
     # write titles
     i = 0
@@ -68,10 +69,16 @@ def writeResult(outfilename, blocks, data_per_group):
 
             
 def main():
+    infilenames = []
     if len(sys.argv) < 2:
-        print "Usage: %s <filename>" % (sys.argv[0])
-        sys.exit(1)
-    for infilename in sys.argv[1:]:
+        for i in glob.glob("*.xls"):
+            if "res_" not in i:
+                infilenames.append(i)
+    else:
+        infilenames = sys.argv[1:]
+
+    for infilename in infilenames:
+        print "Processing %s ..." % infilename
         blocks = toBlock(infilename)
         prefix = infilename.split('.')[0]
         writeResult(prefix, blocks, 3)
