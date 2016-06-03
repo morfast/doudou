@@ -28,40 +28,43 @@ def toBlock(filename):
 
     return blocks
 
-def writeResult(outfilename, blocks, data_per_group, group_per_line):
+def writeResult(outfilename, blocks, data_per_group):
     """ write result to files """
     allfile = open("".join([outfilename, "_all.xls"]), "w")
     meandevfile = open("".join([outfilename, "_meandev.xls"]), "w")
 
-    while group_per_line:
-        for block in blocks:
-            ngroup = 0
-            i = 0
-            thl = []
-            for n in block:
-                thl.append(n)
-                allfile.write("%f\t" % n)
-                i += 1
-                if (i % data_per_group == 0):
-                    allfile.write("\t")
-                    m, d = meandev(thl)
-                    meandevfile.write("%f\t" % m)
-                    meandevfile.write("%f" % d)
-                    meandevfile.write("\t\t")
-                    thl = []
-                    ngroup += 1
-                    if ngroup >= group_per_line:
-                        allfile.write("\n")
-                        meandevfile.write("\n")
-                        break
+    # write titles
+    i = 0
+    for letter in range(len(blocks[0])/12):
+        for number in range(12):
+            i += 1
+            allfile.write("".join([chr(ord('A') + letter), str(number+1), '\t']))
+            if (i % data_per_group == 0):
+                allfile.write("\t")
+            if ((i-1) % data_per_group == 0):
+                meandevfile.write("".join([chr(ord('A') + letter), str(number+1), '\t']))
+            else:
+                meandevfile.write("\t")
+    allfile.write("\n")
+    meandevfile.write("\n")
+
+
+    for block in blocks:
+        i = 0
+        thl = []
+        for n in block:
+            thl.append(n)
+            allfile.write("%f\t" % n)
+            i += 1
+            if (i % data_per_group == 0):
+                allfile.write("\t")
+                m, d = meandev(thl)
+                meandevfile.write("%f\t" % m)
+                meandevfile.write("%f" % d)
+                meandevfile.write("\t\t")
+                thl = []
         allfile.write("\n")
         meandevfile.write("\n")
-
-        for n,block in enumerate(blocks):
-            blocks[n] = block[data_per_group * group_per_line:]
-
-        if len(blocks[0])/data_per_group < group_per_line:
-            group_per_line = len(blocks[0])/data_per_group
 
             
 def main():
@@ -71,6 +74,6 @@ def main():
     for infilename in sys.argv[1:]:
         blocks = toBlock(infilename)
         prefix = infilename.split('.')[0]
-        writeResult(prefix, blocks, 3, 3)
+        writeResult(prefix, blocks, 3)
 
 main()
